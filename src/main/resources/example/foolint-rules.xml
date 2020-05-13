@@ -21,7 +21,7 @@
 		</description>
 		<severity>MAJOR</severity>
 		<cardinality>SINGLE</cardinality>
-		<status>BETA</status>
+		<status>READY</status>
 		<type>CODE_SMELL</type>
 		<tag>example</tag>
 		<tag>convention</tag>

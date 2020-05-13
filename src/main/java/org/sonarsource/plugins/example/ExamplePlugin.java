@@ -37,6 +37,8 @@ import org.sonarsource.plugins.example.settings.FooLanguageProperties;
 import org.sonarsource.plugins.example.settings.HelloWorldProperties;
 import org.sonarsource.plugins.example.settings.SayHelloFromScanner;
 import org.sonarsource.plugins.example.web.MyPluginPageDefinition;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import static java.util.Arrays.asList;
 
@@ -45,31 +47,43 @@ import static java.util.Arrays.asList;
  */
 public class ExamplePlugin implements Plugin {
 
+  private static final Logger LOGGER = Loggers.get(FooLanguage.class);
+
   @Override
   public void define(Context context) {
     // tutorial on hooks
     // http://docs.sonarqube.org/display/DEV/Adding+Hooks
+
+    LOGGER.info("JCV ExamplePlugin.define() 1");
     context.addExtensions(PostJobInScanner.class, DisplayQualityGateStatus.class);
 
+    LOGGER.info("JCV ExamplePlugin.define() 2");
     // tutorial on languages
     context.addExtensions(FooLanguage.class, FooQualityProfile.class);
     context.addExtension(FooLanguageProperties.getProperties());
 
+    LOGGER.info("JCV ExamplePlugin.define() 3");
     // tutorial on measures
     context
       .addExtensions(ExampleMetrics.class, SetSizeOnFilesSensor.class, ComputeSizeAverage.class, ComputeSizeRating.class);
 
+    LOGGER.info("JCV ExamplePlugin.define() 4");
     // tutorial on rules
     context.addExtensions(JavaRulesDefinition.class, CreateIssuesOnJavaFilesSensor.class);
     context.addExtensions(FooLintRulesDefinition.class, FooLintIssuesLoaderSensor.class);
 
+    LOGGER.info("JCV ExamplePlugin.define() 5");
     // tutorial on settings
     context
       .addExtensions(HelloWorldProperties.getProperties())
       .addExtension(SayHelloFromScanner.class);
 
+    LOGGER.info("JCV ExamplePlugin.define() 6");
+
     // tutorial on web extensions
     context.addExtension(MyPluginPageDefinition.class);
+
+    LOGGER.info("JCV ExamplePlugin.define() 7");
 
     context.addExtensions(asList(
       PropertyDefinition.builder("sonar.foo.file.suffixes")
@@ -78,5 +92,7 @@ public class ExamplePlugin implements Plugin {
         .category("FooLint")
         .defaultValue("")
         .build()));
+    
+    LOGGER.info("JCV ExamplePlugin.define() 8");
   }
 }

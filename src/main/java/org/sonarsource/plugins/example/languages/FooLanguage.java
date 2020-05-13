@@ -22,6 +22,8 @@ package org.sonarsource.plugins.example.languages;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 import org.sonarsource.plugins.example.settings.FooLanguageProperties;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 /**
  * This class defines the fictive Foo language.
@@ -30,6 +32,8 @@ public final class FooLanguage extends AbstractLanguage {
 
   public static final String NAME = "Foo";
   public static final String KEY = "foo";
+
+  private static final Logger LOGGER = Loggers.get(FooLanguage.class);
 
   private final Configuration config;
 
@@ -40,6 +44,7 @@ public final class FooLanguage extends AbstractLanguage {
 
   @Override
   public String[] getFileSuffixes() {
+    LOGGER.info("JCV FooLanguage.getFileSuffixes() 1");
     return config.getStringArray(FooLanguageProperties.FILE_SUFFIXES_KEY);
   }
 
