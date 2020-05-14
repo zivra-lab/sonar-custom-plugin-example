@@ -20,6 +20,7 @@
 package org.sonarsource.plugins.example;
 
 import org.sonar.api.Plugin;
+import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonarsource.plugins.example.hooks.PostJobInScanner;
 import org.sonarsource.plugins.example.hooks.DisplayQualityGateStatus;
@@ -48,6 +49,8 @@ import static java.util.Arrays.asList;
 public class ExamplePlugin implements Plugin {
 
   private static final Logger LOGGER = Loggers.get(FooLanguage.class);
+
+  public static final String WHITELIST_PROPERTY_KEY = "sonar.foo.url.whitelist";
 
   @Override
   public void define(Context context) {
@@ -91,7 +94,15 @@ public class ExamplePlugin implements Plugin {
         .description("Suffixes supported by FooLint")
         .category("FooLint")
         .defaultValue("")
-        .build()));
+        .build(),
+        PropertyDefinition.builder("sonar.foo.url.whitelist")
+        .name("URL Whitelist")
+        .description("URL regex patterns not marked as errors. One per line")
+        .category("FooLint")
+        .defaultValue("")
+        .type(PropertyType.TEXT)
+        .build()
+        ));
     
     LOGGER.info("JCV ExamplePlugin.define() 8");
   }

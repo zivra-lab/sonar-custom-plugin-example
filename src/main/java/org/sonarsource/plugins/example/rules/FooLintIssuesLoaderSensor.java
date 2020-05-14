@@ -40,6 +40,7 @@ import org.sonar.api.config.Configuration;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+import org.sonarsource.plugins.example.ExamplePlugin;
 import org.sonarsource.plugins.example.languages.FooLanguage;
 
 /**
@@ -95,6 +96,13 @@ public class FooLintIssuesLoaderSensor implements Sensor {
   @Override
   public void execute(final SensorContext context) {
     this.context = context;
+    Optional<String> whitelistOptional = config.get(ExamplePlugin.WHITELIST_PROPERTY_KEY);
+    String whitelist = whitelistOptional.get();
+    LOGGER.info("JCV Whitelist: " + whitelist);
+    List<String> whitelistLines = Arrays.asList(whitelist.split("\\n"));
+    for(String line: whitelistLines) {
+      LOGGER.info("JCV Whitelist Line: " + line);
+    }
     LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 1");
     LOGGER.info("JCV (mock) Parsing 'FooLint' Analysis Results");
     final FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
@@ -102,7 +110,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     final FileSystem fs = context.fileSystem();
     final Iterable<InputFile> files = context.fileSystem().inputFiles(fs.predicates().all());
     for (InputFile inputFile : files) {
-      final List<ErrorDataFromExternalLinter> errors = parser.scanForUrls(inputFile);
+      final List<ErrorDataFromExternalLinter> errors = parser.scanForUrls(inputFile, whitelistLines);
       LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 3");
       for (final ErrorDataFromExternalLinter error : errors) {
         LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 4");
@@ -318,7 +326,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     */
     
 
-    public List<ErrorDataFromExternalLinter> scanForUrls(final InputFile inputFile) {
+    public List<ErrorDataFromExternalLinter> scanForUrls(final InputFile inputFile, List<String> whitelistLines) {
       final String regex = ".*https?://.*";
       final List<ErrorDataFromExternalLinter> issues = new ArrayList<>();
       int lineNumber = 0;
@@ -330,11 +338,26 @@ public class FooLintIssuesLoaderSensor implements Sensor {
           final String text = sc.nextLine();
           final boolean matches = Pattern.matches(regex, text);
           String filePath = inputFile.relativePath();
-          LOGGER.info(file.getAbsolutePath() + " / " + filePath + " line number:" + lineNumber + " / matches = " + matches);
           if (matches) {
-            issues.add(new ErrorDataFromExternalLinter("foundURL", "Unexpected URL was found in code",
-                filePath , lineNumber));
-            LOGGER.info(text);
+            LOGGER.info(filePath + ":" + lineNumber + "(matches) " + text);
+            boolean matchesWhitelistLine = false;
+            for(String whitelistLine: whitelistLines) {
+              String whitelistLineRegex = ".*" + whitelistLine + ".*";
+              matchesWhitelistLine = Pattern.matches(whitelistLineRegex, text);
+              if(matchesWhitelistLine){
+                LOGGER.info("JCV line matches whitelisted URL");
+                break;
+              }
+            }
+            if(!matchesWhitelistLine){
+              LOGGER.info("Line added");
+              issues.add(new ErrorDataFromExternalLinter("foundURL", "Unexpected URL was found in code",
+              filePath , lineNumber));
+            }
+            else{
+              LOGGER.info("Line NOT added");
+            }
+            //LOGGER.info(text);
           }
         }
       } catch (final IOException e) {
