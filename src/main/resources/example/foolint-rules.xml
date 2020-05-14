@@ -47,7 +47,7 @@
 		<key>foundURL</key>
 		<name>Found URL</name>
 		<internalKey>foundURL</internalKey>
-		<description>Unexpected URL was found in code
+		<description>Unexpected URL was found in code!
 		</description>
 		<severity>BLOCKER</severity>
 		<cardinality>SINGLE</cardinality>

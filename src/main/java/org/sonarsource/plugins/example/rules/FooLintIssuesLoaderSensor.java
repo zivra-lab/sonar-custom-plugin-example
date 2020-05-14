@@ -322,15 +322,8 @@ public class FooLintIssuesLoaderSensor implements Sensor {
       }
       
 
+   LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 2");
 
-
-  //    ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 5);
-  //    ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 9);
-      LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 2");
-
-//      return Arrays.asList(fooError1, fooError2);
-  //    issues.add(fooError1);
-  //    issues.add(fooError2);
       return issues;
 
 
