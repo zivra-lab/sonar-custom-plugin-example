@@ -43,4 +43,18 @@
 	    <remediationFunctionGapMultiplier>10min</remediationFunctionGapMultiplier>
 	    <remediationFunctionBaseEffort>30min</remediationFunctionBaseEffort>		
 	</rule>
+	<rule>
+		<key>foundURL</key>
+		<name>Found URL</name>
+		<internalKey>foundURL</internalKey>
+		<description>Unexpected URL was found in code
+		</description>
+		<severity>BLOCKER</severity>
+		<cardinality>SINGLE</cardinality>
+		<status>READY</status>
+		<type>BUG</type>
+		<tag>example</tag>
+		<remediationFunction>CONSTANT_ISSUE</remediationFunction>
+        <remediationFunctionBaseEffort>2min</remediationFunctionBaseEffort>
+	</rule>
 </foolint-rules>

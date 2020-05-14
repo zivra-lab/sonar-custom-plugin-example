@@ -22,7 +22,12 @@ package org.sonarsource.plugins.example.rules;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.stream.XMLStreamException;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
@@ -273,8 +278,8 @@ public class FooLintIssuesLoaderSensor implements Sensor {
 
       // as the goal of this example is not to demonstrate how to parse an xml file we return an hard coded list of FooError
 
-      ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 5);
-      ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 9);
+      ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 2);
+      ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 7);
       LOGGER.info("JCV FooLintAnalysisResultsParser.parse() 2");
 
       return Arrays.asList(fooError1, fooError2);
@@ -286,11 +291,49 @@ public class FooLintIssuesLoaderSensor implements Sensor {
       //LOGGER.info("Parsing file {}", file.getAbsolutePath());
       // as the goal of this example is not to demonstrate how to parse an xml file we return an hard coded list of FooError
 
-      ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 5);
-      ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 9);
+  
+      List<ErrorDataFromExternalLinter> issues= new ArrayList<>();
+
+      String regex = ".*https?://.*";
+
+      File file = new File("src/MyClass.foo");
+      int lineNumber=0;
+      try (Scanner sc = new Scanner(file, StandardCharsets.UTF_8.name())) {
+          while (sc.hasNextLine()){
+  
+        lineNumber++;
+        String text  = sc.nextLine();
+  
+        boolean matches = Pattern.matches(regex, text);
+  
+        System.out.println("matches = " + matches + " - line number:"+ lineNumber);
+        if (matches) {
+          issues.add(new ErrorDataFromExternalLinter("foundURL", "Unexpected URL was found in code", "src/MyClass.foo", lineNumber));
+        }
+
+
+        
+        LOGGER.info(text);
+        }
+      }
+      catch (IOException e) {
+        e.printStackTrace();
+
+      }
+      
+
+
+
+  //    ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 5);
+  //    ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 9);
       LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 2");
 
-      return Arrays.asList(fooError1, fooError2);
+//      return Arrays.asList(fooError1, fooError2);
+  //    issues.add(fooError1);
+  //    issues.add(fooError2);
+      return issues;
+
+
     }
     //JCV END
   }

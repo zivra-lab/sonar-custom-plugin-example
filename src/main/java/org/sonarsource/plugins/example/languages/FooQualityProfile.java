@@ -39,7 +39,8 @@ public final class FooQualityProfile implements BuiltInQualityProfilesDefinition
     rule2.overrideSeverity("MAJOR");
     NewBuiltInActiveRule rule3 = profile.activateRule(REPO_KEY, "ExampleRule3");
     rule3.overrideSeverity("CRITICAL");
-
+    NewBuiltInActiveRule rule4 = profile.activateRule(REPO_KEY, "foundURL");
+    rule4.overrideSeverity("CRITICAL");
     profile.done();
   }
 
