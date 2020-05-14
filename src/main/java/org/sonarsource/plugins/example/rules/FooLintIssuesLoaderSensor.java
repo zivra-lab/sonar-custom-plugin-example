@@ -43,9 +43,10 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonarsource.plugins.example.languages.FooLanguage;
 
 /**
- * The goal of this Sensor is to load the results of an analysis performed by a fictive external tool named: FooLint
- * Results are provided as an xml file and are corresponding to the rules defined in 'rules.xml'.
- * To be very abstract, these rules are applied on source files made with the fictive language Foo.
+ * The goal of this Sensor is to load the results of an analysis performed by a
+ * fictive external tool named: FooLint Results are provided as an xml file and
+ * are corresponding to the rules defined in 'rules.xml'. To be very abstract,
+ * these rules are applied on source files made with the fictive language Foo.
  */
 public class FooLintIssuesLoaderSensor implements Sensor {
 
@@ -81,7 +82,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
 
   protected String getReportPath() {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getReportPath() 1");
-    Optional<String> o = config.get(reportPathKey());
+    final Optional<String> o = config.get(reportPathKey());
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getReportPath() 2");
     if (o.isPresent()) {
       LOGGER.info("JCV FooLintIssuesLoaderSensor.getReportPath() 3");
@@ -93,65 +94,75 @@ public class FooLintIssuesLoaderSensor implements Sensor {
 
   @Override
   public void execute(final SensorContext context) {
+    this.context = context;
     LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 1");
-    String reportPath = getReportPath();
+    LOGGER.info("JCV (mock) Parsing 'FooLint' Analysis Results");
+    final FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
     LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 2");
-    if (reportPath != null) {
+    final FileSystem fs = context.fileSystem();
+    final Iterable<InputFile> files = context.fileSystem().inputFiles(fs.predicates().all());
+    for (InputFile inputFile : files) {
+      final List<ErrorDataFromExternalLinter> errors = parser.scanForUrls(inputFile);
       LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 3");
-      this.context = context;
-      LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 4");
-      File analysisResultsFile = new File(reportPath);
-      LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 5");
-      try {
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 6");
-        parseAndSaveResults(analysisResultsFile);
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 7");
-      } catch (XMLStreamException e) {
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 8");
-        throw new IllegalStateException("Unable to parse the provided FooLint file", e);
+      for (final ErrorDataFromExternalLinter error : errors) {
+        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 4");
+        getResourceAndSaveIssue(error);
       }
-      LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 9");
     }
-    //JCV START
-    else{
-      this.context = context;
-      LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 10");
-      try {
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 11");
-        parseAndSaveResultsJCV();
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 12");
-      } catch (XMLStreamException e) {
-        LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 13");
-        throw new IllegalStateException("Unable to parse the provided FooLint file", e);
-      }
-      LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 14");
-    }
-    //JCV END
   }
 
-  //JCV START
+  /*
+   * @Override public void execute(final SensorContext context) {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 1"); String reportPath =
+   * getReportPath(); LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 2"); if
+   * (reportPath != null) {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 3"); this.context =
+   * context; LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 4"); File
+   * analysisResultsFile = new File(reportPath);
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 5"); try {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 6");
+   * parseAndSaveResults(analysisResultsFile);
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 7"); } catch
+   * (XMLStreamException e) {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 8"); throw new
+   * IllegalStateException("Unable to parse the provided FooLint file", e); }
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 9"); } //JCV START else{
+   * this.context = context;
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 10"); try {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 11");
+   * parseAndSaveResultsJCV();
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 12"); } catch
+   * (XMLStreamException e) {
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 13"); throw new
+   * IllegalStateException("Unable to parse the provided FooLint file", e); }
+   * LOGGER.info("JCV FooLintIssuesLoaderSensor.execute() 14"); } //JCV END }
+   */
+
+   /*
+  // JCV START
   protected void parseAndSaveResultsJCV() throws XMLStreamException {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResultsJCV() 1");
     LOGGER.info("JCV (mock) Parsing 'FooLint' Analysis Results");
-    FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
+    final FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResultsJCV() 2");
-    List<ErrorDataFromExternalLinter> errors = parser.parseJCV();
+    final List<ErrorDataFromExternalLinter> errors = parser.parseJCV();
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResultsJCV() 3");
-    for (ErrorDataFromExternalLinter error : errors) {
+    for (final ErrorDataFromExternalLinter error : errors) {
       LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResultsJCV() 4");
       getResourceAndSaveIssue(error);
     }
   }
-  //JCV END
+  // JCV END
+  */
 
   protected void parseAndSaveResults(final File file) throws XMLStreamException {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResults() 1");
     LOGGER.info("(mock) Parsing 'FooLint' Analysis Results");
-    FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
+    final FooLintAnalysisResultsParser parser = new FooLintAnalysisResultsParser();
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResults() 2");
-    List<ErrorDataFromExternalLinter> errors = parser.parse(file);
+    final List<ErrorDataFromExternalLinter> errors = parser.parse(file);
     LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResults() 3");
-    for (ErrorDataFromExternalLinter error : errors) {
+    for (final ErrorDataFromExternalLinter error : errors) {
       LOGGER.info("JCV FooLintIssuesLoaderSensor.parseAndSaveResults() 4");
       getResourceAndSaveIssue(error);
     }
@@ -160,14 +171,13 @@ public class FooLintIssuesLoaderSensor implements Sensor {
   private void getResourceAndSaveIssue(final ErrorDataFromExternalLinter error) {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getResourceAndSaveIssue() 1");
     LOGGER.info("JCV error.toString(): " + error.toString());
-    //LOGGER.debug(error.toString());
+    // LOGGER.debug(error.toString());
 
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getResourceAndSaveIssue() 2");
-    InputFile inputFile = fileSystem.inputFile(
-      fileSystem.predicates().and(
-        fileSystem.predicates().hasRelativePath(error.getFilePath()),
-        fileSystem.predicates().hasType(InputFile.Type.MAIN)));
-    
+    final InputFile inputFile = fileSystem
+        .inputFile(fileSystem.predicates().and(fileSystem.predicates().hasRelativePath(error.getFilePath()),
+            fileSystem.predicates().hasType(InputFile.Type.MAIN)));
+
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getResourceAndSaveIssue() 3");
 
     LOGGER.info("inputFile null ? " + (inputFile == null));
@@ -182,28 +192,26 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     }
   }
 
-  private void saveIssue(final InputFile inputFile, int line, final String externalRuleKey, final String message) {
+  private void saveIssue(final InputFile inputFile, final int line, final String externalRuleKey,
+      final String message) {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.saveIssue() 1");
     LOGGER.info("JCV inputFile: " + inputFile.toString());
     LOGGER.info("JCV line: " + line);
     LOGGER.info("JCV externalRuleKey (error type): " + externalRuleKey);
-    LOGGER.info("JCV message (error description): " + externalRuleKey);
-    LOGGER.info("JCV message (error description): " + inputFile.language());
-    String repoKeyForLang = getRepositoryKeyForLanguage(inputFile.language());
-    
-    RuleKey ruleKey = RuleKey.of(repoKeyForLang, externalRuleKey);
+    LOGGER.info("JCV message (error description): " + message);
+    LOGGER.info("JCV InputFile language: " + inputFile.language());
+    final String repoKeyForLang = getRepositoryKeyForLanguage(inputFile.language());
+
+    final RuleKey ruleKey = RuleKey.of(repoKeyForLang, externalRuleKey);
 
     LOGGER.info("JCV ruleKey: " + ruleKey);
 
     LOGGER.info("JCV FooLintIssuesLoaderSensor.saveIssue() 2");
     LOGGER.info("JCV context: " + context);
-    NewIssue newIssue = context.newIssue()
-      .forRule(ruleKey);
+    final NewIssue newIssue = context.newIssue().forRule(ruleKey);
 
     LOGGER.info("JCV FooLintIssuesLoaderSensor.saveIssue() 3");
-    NewIssueLocation primaryLocation = newIssue.newLocation()
-      .on(inputFile)
-      .message(message);
+    final NewIssueLocation primaryLocation = newIssue.newLocation().on(inputFile).message(message);
     if (line > 0) {
       LOGGER.info("JCV FooLintIssuesLoaderSensor.saveIssue() 4");
       primaryLocation.at(inputFile.selectLine(line));
@@ -214,7 +222,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     newIssue.save();
   }
 
-  private static String getRepositoryKeyForLanguage(String languageKey) {
+  private static String getRepositoryKeyForLanguage(final String languageKey) {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.getRepositoryKeyForLanguage() 1");
     return languageKey.toLowerCase() + "-" + FooLintRulesDefinition.KEY;
   }
@@ -231,7 +239,8 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     private final String filePath;
     private final int line;
 
-    public ErrorDataFromExternalLinter(final String externalRuleId, final String issueMessage, final String filePath, final int line) {
+    public ErrorDataFromExternalLinter(final String externalRuleId, final String issueMessage, final String filePath,
+        final int line) {
       LOGGER.info("JCV ErrorDataFromExternalLinter.constructor() 1");
       this.externalRuleId = externalRuleId;
       this.issueMessage = issueMessage;
@@ -257,7 +266,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
 
     @Override
     public String toString() {
-      StringBuilder s = new StringBuilder();
+      final StringBuilder s = new StringBuilder();
       s.append(externalRuleId);
       s.append("|");
       s.append(issueMessage);
@@ -276,59 +285,66 @@ public class FooLintIssuesLoaderSensor implements Sensor {
       LOGGER.info("JCV FooLintAnalysisResultsParser.parse() 1");
       LOGGER.info("Parsing file {}", file.getAbsolutePath());
 
-      // as the goal of this example is not to demonstrate how to parse an xml file we return an hard coded list of FooError
+      // as the goal of this example is not to demonstrate how to parse an xml file we
+      // return an hard coded list of FooError
 
-      ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1", "More precise description of the error", "src/MyClass.foo", 2);
-      ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2", "More precise description of the error", "src/MyClass.foo", 7);
+      final ErrorDataFromExternalLinter fooError1 = new ErrorDataFromExternalLinter("ExampleRule1",
+          "More precise description of the error", "src/MyClass.foo", 2);
+      final ErrorDataFromExternalLinter fooError2 = new ErrorDataFromExternalLinter("ExampleRule2",
+          "More precise description of the error", "src/MyClass.foo", 7);
       LOGGER.info("JCV FooLintAnalysisResultsParser.parse() 2");
 
       return Arrays.asList(fooError1, fooError2);
     }
 
-    //JCV START
-    public List<ErrorDataFromExternalLinter> parseJCV() throws XMLStreamException {
+    /*
+
+    // JCV START
+    public List<ErrorDataFromExternalLinter> parseJCV() {
       LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 1");
-      //LOGGER.info("Parsing file {}", file.getAbsolutePath());
-      // as the goal of this example is not to demonstrate how to parse an xml file we return an hard coded list of FooError
+      // LOGGER.info("Parsing file {}", file.getAbsolutePath());
+      // as the goal of this example is not to demonstrate how to parse an xml file we
+      // return an hard coded list of FooError
 
-  
-      List<ErrorDataFromExternalLinter> issues= new ArrayList<>();
+      final File file = new File("src/MyClass.foo");
+      final List<ErrorDataFromExternalLinter> issues = scanForUrls(file);
 
-      String regex = ".*https?://.*";
-
-      File file = new File("src/MyClass.foo");
-      int lineNumber=0;
-      try (Scanner sc = new Scanner(file, StandardCharsets.UTF_8.name())) {
-          while (sc.hasNextLine()){
-  
-        lineNumber++;
-        String text  = sc.nextLine();
-  
-        boolean matches = Pattern.matches(regex, text);
-  
-        System.out.println("matches = " + matches + " - line number:"+ lineNumber);
-        if (matches) {
-          issues.add(new ErrorDataFromExternalLinter("foundURL", "Unexpected URL was found in code", "src/MyClass.foo", lineNumber));
-        }
-
-
-        
-        LOGGER.info(text);
-        }
-      }
-      catch (IOException e) {
-        e.printStackTrace();
-
-      }
-      
-
-   LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 2");
+      LOGGER.info("JCV FooLintAnalysisResultsParser.parseJCV() 2");
 
       return issues;
 
-
     }
-    //JCV END
+    // JCV END
+    */
+    
+
+    public List<ErrorDataFromExternalLinter> scanForUrls(final InputFile inputFile) {
+      final String regex = ".*https?://.*";
+      final List<ErrorDataFromExternalLinter> issues = new ArrayList<>();
+      int lineNumber = 0;
+      LOGGER.info("JCV FooLintAnalysisResultsParser.scanForUrls() 1");
+      File file = inputFile.file();
+      try (Scanner sc = new Scanner(file, StandardCharsets.UTF_8.name())) {
+        while (sc.hasNextLine()) {
+          lineNumber++;
+          final String text = sc.nextLine();
+          final boolean matches = Pattern.matches(regex, text);
+          String filePath = inputFile.relativePath();
+          LOGGER.info(file.getAbsolutePath() + " / " + filePath + " line number:" + lineNumber + " / matches = " + matches);
+          if (matches) {
+            issues.add(new ErrorDataFromExternalLinter("foundURL", "Unexpected URL was found in code",
+                filePath , lineNumber));
+            LOGGER.info(text);
+          }
+        }
+      } catch (final IOException e) {
+        e.printStackTrace();
+
+      }
+      LOGGER.info("JCV FooLintAnalysisResultsParser.scanForUrls() 2");
+      return issues;
+    }
+
   }
 
 }
