@@ -42,7 +42,7 @@ public class JavaRulesDefinition implements RulesDefinition {
       .setTags("style", "stupid")
 
       // optional status. Default value is READY.
-      .setStatus(RuleStatus.BETA)
+      .setStatus(RuleStatus.READY)
 
       // default severity when the rule is activated on a Quality profile. Default value is MAJOR.
       .setSeverity(Severity.MINOR);

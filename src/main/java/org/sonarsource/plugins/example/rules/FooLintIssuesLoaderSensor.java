@@ -73,7 +73,7 @@ public class FooLintIssuesLoaderSensor implements Sensor {
     LOGGER.info("JCV FooLintIssuesLoaderSensor.describe() 1");
     descriptor.name("FooLint Issues Loader Sensor");
     LOGGER.info("JCV FooLintIssuesLoaderSensor.describe() 2");
-    descriptor.onlyOnLanguage(FooLanguage.KEY);
+    //descriptor.onlyOnLanguage(FooLanguage.KEY);
     LOGGER.info("JCV FooLintIssuesLoaderSensor.describe() 3");
   }
 

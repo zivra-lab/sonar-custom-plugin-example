@@ -20,6 +20,7 @@
 package org.sonarsource.plugins.example.languages;
 
 import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
+import org.sonarsource.plugins.example.rules.JavaRulesDefinition;
 
 import static org.sonarsource.plugins.example.rules.FooLintRulesDefinition.REPO_KEY;
 
@@ -30,8 +31,28 @@ public final class FooQualityProfile implements BuiltInQualityProfilesDefinition
 
   @Override
   public void define(Context context) {
+    buildQualityProfile(context, "Foo FooLint Rules", FooLanguage.KEY, true);
+    buildQualityProfile(context, "Java FooLint Rules", JavaRulesDefinition.JAVA_LANGUAGE, false);
+
+    /*
     NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile("FooLint Rules", FooLanguage.KEY);
     profile.setDefault(true);
+
+    NewBuiltInActiveRule rule1 = profile.activateRule(REPO_KEY, "ExampleRule1");
+    rule1.overrideSeverity("BLOCKER");
+    NewBuiltInActiveRule rule2 = profile.activateRule(REPO_KEY, "ExampleRule2");
+    rule2.overrideSeverity("MAJOR");
+    NewBuiltInActiveRule rule3 = profile.activateRule(REPO_KEY, "ExampleRule3");
+    rule3.overrideSeverity("CRITICAL");
+    NewBuiltInActiveRule rule4 = profile.activateRule(REPO_KEY, "foundURL");
+    rule4.overrideSeverity("BLOCKER");
+    profile.done();
+    */
+  }
+
+  public void buildQualityProfile(Context context, String name, String language, boolean setDefault){
+    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(name, language);
+    profile.setDefault(setDefault);
 
     NewBuiltInActiveRule rule1 = profile.activateRule(REPO_KEY, "ExampleRule1");
     rule1.overrideSeverity("BLOCKER");
