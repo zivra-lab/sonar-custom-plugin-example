@@ -54,7 +54,7 @@ public final class FooLintRulesDefinition implements RulesDefinition {
   @Override
   public void define(Context context) {
     defineRulesForLanguage(context, REPO_KEY, REPO_NAME, FooLanguage.KEY);
-    defineRulesForLanguage(context, "java-foolint", "java-FooLint", "java");
+    //defineRulesForLanguage(context, "java-foolint", "java-FooLint", "java");
   }
 
 }

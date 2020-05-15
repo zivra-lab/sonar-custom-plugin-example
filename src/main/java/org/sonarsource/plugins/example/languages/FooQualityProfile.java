@@ -32,7 +32,7 @@ public final class FooQualityProfile implements BuiltInQualityProfilesDefinition
   @Override
   public void define(Context context) {
     buildQualityProfile(context, "Foo FooLint Rules", FooLanguage.KEY, true);
-    buildQualityProfile(context, "Java FooLint Rules", JavaRulesDefinition.JAVA_LANGUAGE, false);
+    //buildQualityProfile(context, "Java FooLint Rules", JavaRulesDefinition.JAVA_LANGUAGE, false);
 
     /*
     NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile("FooLint Rules", FooLanguage.KEY);
